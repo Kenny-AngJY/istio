@@ -6,7 +6,6 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/instance: curl
       app.kubernetes.io/name: curl
   strategy:
     rollingUpdate:
@@ -16,14 +15,15 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: curl
         app.kubernetes.io/name: curl
         # sidecar.istio.io/inject: "true"
     spec:
+      terminationGracePeriodSeconds: 0
       containers:
-      - image: curl:8.17.0
+      - name: curl
+        image: docker.io/curlimages/curl:8.17.0
+        command: ["/bin/sleep", "infinity"]
         imagePullPolicy: IfNotPresent
-        name: curl
         resources:
           requests:
             cpu: 100m
@@ -33,4 +33,4 @@ spec:
             memory: 200Mi
         securityContext:
           allowPrivilegeEscalation: false
-          runAsNonRoot: true
+          readOnlyRootFilesystem: true
