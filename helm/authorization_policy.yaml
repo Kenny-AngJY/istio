@@ -1,0 +1,17 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-headers-from-no-sidecar
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  action: DENY
+  rules:
+  - from:
+    - source:
+        notNamespaces: ["default"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/headers"]
