@@ -16,7 +16,6 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: curl
-        # sidecar.istio.io/inject: "true"
     spec:
       terminationGracePeriodSeconds: 0
       containers:
