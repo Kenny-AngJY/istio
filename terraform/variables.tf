@@ -34,7 +34,7 @@ variable "use_eks_pod_identity_agent" {
 
 variable "create_eks_worker_nodes_in_private_subnet" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "use_fargate_profile" {
