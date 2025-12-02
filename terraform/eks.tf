@@ -193,6 +193,15 @@ resource "aws_security_group_rule" "node_port" {
   security_group_id = module.eks.node_security_group_id
 }
 
+resource "aws_vpc_security_group_ingress_rule" "allow_15017_from_API_server" {
+  description                  = "Allo inbound traffic on port 15017 from the EKS API server SG to the node SG for Istio"
+  security_group_id            = module.eks.node_security_group_id
+  from_port                    = 15017
+  to_port                      = 15017
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = module.eks.cluster_primary_security_group_id
+}
+
 output "eks_managed_node_groups_autoscaling_group_names" {
   value = module.eks.eks_managed_node_groups_autoscaling_group_names
 }
