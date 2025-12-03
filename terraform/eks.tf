@@ -183,16 +183,6 @@ resource "aws_eks_addon" "amazon_cloudwatch_observability" {
   depends_on = [module.eks]
 }
 
-resource "aws_security_group_rule" "node_port" {
-  count             = var.create_eks_worker_nodes_in_private_subnet ? 0 : 1
-  type              = "ingress"
-  from_port         = 30000
-  to_port           = 32767
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = module.eks.node_security_group_id
-}
-
 resource "aws_vpc_security_group_ingress_rule" "allow_15017_from_API_server" {
   description                  = "Allo inbound traffic on port 15017 from the EKS API server SG to the node SG for Istio"
   security_group_id            = module.eks.node_security_group_id
