@@ -63,5 +63,5 @@ variable "create_amazon_cloudwatch_observability_add_on" {
 variable "install_istio_charts" {
   description = "Install Istio charts on the EKS cluster."
   type        = bool
-  default     = true
+  default     = false
 }
