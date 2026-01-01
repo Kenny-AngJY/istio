@@ -28,7 +28,7 @@ module "eks" {
     # VPC CNI add-on will create the "aws-node" daemonset in the kube-system namespace.
     vpc-cni = {
       before_compute           = true
-      addon_version            = "v1.20.5-eksbuild.1" # major-version.minor-version.patch-version-eksbuild.build-number.
+      addon_version            = "v1.21.1-eksbuild.1" # major-version.minor-version.patch-version-eksbuild.build-number.
       service_account_role_arn = aws_iam_role.eks_vpc_cni_role.arn
       configuration_values = jsonencode(
         {
@@ -157,7 +157,7 @@ resource "aws_eks_addon" "amazon_cloudwatch_observability" {
   count                       = var.create_amazon_cloudwatch_observability_add_on ? 1 : 0
   cluster_name                = module.eks.cluster_name
   addon_name                  = "amazon-cloudwatch-observability"
-  addon_version               = "v4.7.0-eksbuild.1"
+  addon_version               = "v4.8.0-eksbuild.1"
   resolve_conflicts_on_update = "OVERWRITE" # NONE | OVERWRITE | PRESERVE
 
   # Add-on does not support EKS Pod Identity at this time. Please use IAM roles for service accounts (IRSA) with this add-on.
