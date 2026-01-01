@@ -39,3 +39,36 @@ resource "helm_release" "istiod" {
   version    = "1.28.2" # chart version
   depends_on = [helm_release.istio_base[0]]
 }
+
+# helm get manifest istio-gateway -n istio-system 
+# Creates the following resources:
+# - ServiceAccount
+# - Role
+# - RoleBinding
+# - Service (type: LoadBalancer)
+# - Deployment
+# - HPA
+resource "helm_release" "istio-gateway" {
+  count = var.install_istio_charts && var.install_istio_gateway ? 1 : 0
+  name  = "istio-gateway"
+
+  repository = "https://istio-release.storage.googleapis.com/charts"
+  chart      = "gateway"
+  namespace  = "istio-system"
+  version    = "1.28.2" # chart version
+
+  set = [
+    {
+      name  = "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
+      value = "nlb"
+    },
+    {
+      name  = "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-internal"
+      value = "false"
+    }
+  ]
+
+  depends_on = [
+    helm_release.istiod[0]
+  ]
+}

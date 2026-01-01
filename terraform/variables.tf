@@ -65,3 +65,9 @@ variable "install_istio_charts" {
   type        = bool
   default     = false
 }
+
+variable "install_istio_gateway" {
+  description = "Install Istio gateway on the EKS cluster."
+  type        = bool
+  default     = false
+}
