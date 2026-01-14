@@ -1,6 +1,6 @@
 module "eks" {
   source                                 = "terraform-aws-modules/eks/aws"
-  version                                = "21.9.0" # Published November 17, 2025
+  version                                = "21.14.0" # Published January 13, 2026
   create                                 = true
   name                                   = local.cluster_name
   kubernetes_version                     = "1.34"
@@ -85,19 +85,43 @@ module "eks" {
   }
 
   # Fargate Profile(s)
-  fargate_profiles = var.use_fargate_profile ? {
-    # Disabled logging because aws-logging configmap was not found. configmap "aws-logging" not found
-    fargate_profile_1 = {
-      name            = "fargate_profile_1"
-      create_iam_role = false
+  fargate_profiles = {
+    profile_1 = {
+      create          = var.use_fargate_profile
+      name            = "kube-system"
+      create_iam_role = true # pod_execution_role
       # AWS Fargate can only use private subnets with NAT gateway to deploy your pods.
-      subnets_ids = module.vpc[0].list_of_private_subnet_ids[0]
-
+      subnet_ids = module.vpc[0].list_of_private_subnet_ids
+      selectors = [
+        # If you omit labels, it matches ALL pods in the namespace
+        {
+          namespace = "kube-system"
+        }
+      ]
       tags = {
-        Owner = "test"
+        Terraform = "true"
       }
     }
-  } : {}
+    profile_2 = {
+      create          = var.use_fargate_profile
+      name            = "dev"
+      create_iam_role = true # pod_execution_role
+      # AWS Fargate can only use private subnets with NAT gateway to deploy your pods.
+      subnet_ids = module.vpc[0].list_of_private_subnet_ids
+      selectors = [
+        # Match pods in this namespace with these labels
+        {
+          namespace = "dev"
+          labels = {
+            "app.kubernetes.io/instance" = "dev-services"
+          }
+        }
+      ]
+      tags = {
+        Terraform = "true"
+      }
+    }
+  }
 
   # Cluster access entry
   # To add the current caller identity as an administrator
