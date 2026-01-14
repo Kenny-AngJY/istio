@@ -65,6 +65,7 @@ resource "helm_release" "istio-gateway" {
     {
       name  = "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-internal"
       value = "false"
+      type  = "string"
     }
   ]
 
