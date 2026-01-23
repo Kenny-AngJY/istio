@@ -48,6 +48,8 @@ resource "aws_subnet" "public" {
     var.default_tags,
     {
       Name = format("terraform_public_%s", (count.index + 1))
+      # https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/subnet_discovery/
+      "kubernetes.io/role/elb" = 1
     }
   )
 }
@@ -70,6 +72,8 @@ resource "aws_subnet" "private" {
     var.default_tags,
     {
       Name = format("terraform_private_%s", (count.index + 1))
+      # https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/subnet_discovery/
+      "kubernetes.io/role/internal-elb" = 1
     }
   )
 }
