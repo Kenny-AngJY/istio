@@ -2,6 +2,7 @@
 VPC CNI
 ----------------------------------------------------------------------------------- */
 resource "aws_iam_role" "eks_vpc_cni_role" {
+  count       = var.enable_auto_mode ? 0 : 1
   name        = "vpc-cni-irsa"
   description = "IAM role for VPC-CNI add-on"
 
@@ -51,7 +52,8 @@ resource "aws_iam_role" "eks_vpc_cni_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "eks_vpc_cni_policy_attachment" {
-  role       = aws_iam_role.eks_vpc_cni_role.name
+  count      = var.enable_auto_mode ? 0 : 1
+  role       = aws_iam_role.eks_vpc_cni_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
 }
 
@@ -60,14 +62,14 @@ resource "aws_eks_pod_identity_association" "example" {
   cluster_name    = module.eks.cluster_name
   namespace       = "kube-system"
   service_account = "aws-node"
-  role_arn        = aws_iam_role.eks_vpc_cni_role.arn
+  role_arn        = aws_iam_role.eks_vpc_cni_role[0].arn
 }
 
 /* -----------------------------------------------------------------------------------
 EKS Amazon EBS CSI add-on
 ----------------------------------------------------------------------------------- */
 resource "aws_iam_role" "amazon_EBS_CSI_iam_role" {
-  count       = var.create_aws_ebs_csi_driver_add_on ? 1 : 0
+  count       = var.create_aws_ebs_csi_driver_add_on && !var.enable_auto_mode ? 1 : 0
   name        = "amazon-ebs-csi-irsa"
   description = "IAM role for Amazon EBS CSI driver add-on"
 
@@ -93,7 +95,7 @@ resource "aws_iam_role" "amazon_EBS_CSI_iam_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "amazon_EBS_CSI_iam_role" {
-  count      = var.create_aws_ebs_csi_driver_add_on ? 1 : 0
+  count      = var.create_aws_ebs_csi_driver_add_on && !var.enable_auto_mode ? 1 : 0
   role       = aws_iam_role.amazon_EBS_CSI_iam_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }

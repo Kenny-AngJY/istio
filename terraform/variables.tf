@@ -71,3 +71,9 @@ variable "install_istio_gateway" {
   type        = bool
   default     = false
 }
+
+variable "enable_auto_mode" {
+  description = "Enable auto mode for EKS."
+  type        = bool
+  default     = false
+}

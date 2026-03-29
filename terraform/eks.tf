@@ -14,7 +14,12 @@ module "eks" {
 
   encryption_config = {}
 
-  addons = {
+  compute_config = {
+    enabled = var.enable_auto_mode
+    # node_pools = ["general-purpose"] # Comment this line out when auto mode is disabled
+  }
+
+  addons = var.enable_auto_mode ? {} : {
     coredns = {
       before_compute = true
       addon_version  = "v1.12.4-eksbuild.1"
@@ -29,7 +34,7 @@ module "eks" {
     vpc-cni = {
       before_compute           = true
       addon_version            = "v1.21.1-eksbuild.1" # major-version.minor-version.patch-version-eksbuild.build-number.
-      service_account_role_arn = aws_iam_role.eks_vpc_cni_role.arn
+      service_account_role_arn = aws_iam_role.eks_vpc_cni_role[0].arn
       configuration_values = jsonencode(
         {
           enableNetworkPolicy = "true" # To enable using the NetworkPolicy controller
@@ -71,7 +76,7 @@ module "eks" {
   # }
 
   # EKS Managed Node Group(s)
-  eks_managed_node_groups = var.use_fargate_profile ? {} : {
+  eks_managed_node_groups = var.use_fargate_profile || var.enable_auto_mode ? {} : {
     eks_managed_NG1 = {
       min_size = 1
       max_size = 2
