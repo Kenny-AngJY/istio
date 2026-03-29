@@ -1,9 +1,9 @@
 module "eks" {
   source                                 = "terraform-aws-modules/eks/aws"
-  version                                = "21.14.0" # Published January 13, 2026
+  version                                = "21.15.1" # Published January 21, 2026
   create                                 = true
   name                                   = local.cluster_name
-  kubernetes_version                     = "1.34"
+  kubernetes_version                     = "1.35"
   authentication_mode                    = "API"
   endpoint_private_access                = true # Indicates whether or not the Amazon EKS private API server endpoint is enabled
   endpoint_public_access                 = true # Indicates whether or not the Amazon EKS public API server endpoint is enabled
@@ -22,18 +22,18 @@ module "eks" {
   addons = var.enable_auto_mode ? {} : {
     coredns = {
       before_compute = true
-      addon_version  = "v1.12.4-eksbuild.1"
+      addon_version = "v1.13.2-eksbuild.3"
     }
     # kube-proxy pod (that is deployed as a daemonset) shares the same IPv4 address as the node it's on.
     kube-proxy = {
       before_compute = true
-      addon_version  = "v1.34.1-eksbuild.2"
+      addon_version  = "v1.35.2-eksbuild.4"
     }
     # Network interface will show all IPs used in the subnet
     # VPC CNI add-on will create the "aws-node" daemonset in the kube-system namespace.
     vpc-cni = {
       before_compute           = true
-      addon_version            = "v1.21.1-eksbuild.1" # major-version.minor-version.patch-version-eksbuild.build-number.
+      addon_version            = "v1.21.1-eksbuild.5" # major-version.minor-version.patch-version-eksbuild.build-number.
       service_account_role_arn = aws_iam_role.eks_vpc_cni_role[0].arn
       configuration_values = jsonencode(
         {
