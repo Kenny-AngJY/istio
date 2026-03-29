@@ -21,7 +21,6 @@ module "eks" {
 
   addons = var.enable_auto_mode ? {} : {
     coredns = {
-      before_compute = true
       addon_version = "v1.13.2-eksbuild.3"
     }
     # kube-proxy pod (that is deployed as a daemonset) shares the same IPv4 address as the node it's on.
@@ -158,7 +157,8 @@ module "eks" {
     "scheduler"
   ]
 
-  tags = local.default_tags
+  tags                = local.default_tags
+  deletion_protection = false
 }
 
 /*
