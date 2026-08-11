@@ -1,9 +1,9 @@
 module "eks" {
   source                                 = "terraform-aws-modules/eks/aws"
-  version                                = "21.15.1" # Published January 21, 2026
+  version                                = "21.24.2" # Published August 7, 2026
   create                                 = true
   name                                   = local.cluster_name
-  kubernetes_version                     = "1.35"
+  kubernetes_version                     = 1.36
   authentication_mode                    = "API"
   endpoint_private_access                = true # Indicates whether or not the Amazon EKS private API server endpoint is enabled
   endpoint_public_access                 = true # Indicates whether or not the Amazon EKS public API server endpoint is enabled
@@ -21,18 +21,18 @@ module "eks" {
 
   addons = var.enable_auto_mode ? {} : {
     coredns = {
-      addon_version = "v1.13.2-eksbuild.3"
+      addon_version = "v1.14.3-eksbuild.3"
     }
     # kube-proxy pod (that is deployed as a daemonset) shares the same IPv4 address as the node it's on.
     kube-proxy = {
       before_compute = true
-      addon_version  = "v1.35.2-eksbuild.4"
+      addon_version  = "v1.36.0-eksbuild.14"
     }
     # Network interface will show all IPs used in the subnet
     # VPC CNI add-on will create the "aws-node" daemonset in the kube-system namespace.
     vpc-cni = {
       before_compute           = true
-      addon_version            = "v1.21.1-eksbuild.5" # major-version.minor-version.patch-version-eksbuild.build-number.
+      addon_version            = "v1.23.0-eksbuild.1" # major-version.minor-version.patch-version-eksbuild.build-number.
       service_account_role_arn = aws_iam_role.eks_vpc_cni_role[0].arn
       configuration_values = jsonencode(
         {
@@ -169,7 +169,7 @@ resource "aws_eks_addon" "aws_ebs_csi_driver" {
   count                       = var.create_aws_ebs_csi_driver_add_on ? 1 : 0
   cluster_name                = module.eks.cluster_name
   addon_name                  = "aws-ebs-csi-driver"
-  addon_version               = "v1.53.0-eksbuild.1"
+  addon_version               = "v1.63.0-eksbuild.1"
   resolve_conflicts_on_update = "OVERWRITE" # NONE | OVERWRITE | PRESERVE
 
   service_account_role_arn = aws_iam_role.amazon_EBS_CSI_iam_role[0].arn
@@ -186,7 +186,7 @@ resource "aws_eks_addon" "amazon_cloudwatch_observability" {
   count                       = var.create_amazon_cloudwatch_observability_add_on ? 1 : 0
   cluster_name                = module.eks.cluster_name
   addon_name                  = "amazon-cloudwatch-observability"
-  addon_version               = "v4.8.0-eksbuild.1"
+  addon_version               = "v6.4.0-eksbuild.1"
   resolve_conflicts_on_update = "OVERWRITE" # NONE | OVERWRITE | PRESERVE
 
   # Add-on does not support EKS Pod Identity at this time. Please use IAM roles for service accounts (IRSA) with this add-on.

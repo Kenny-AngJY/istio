@@ -24,7 +24,7 @@ resource "helm_release" "istio_base" {
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "base"
   namespace  = "istio-system"
-  version    = "1.28.2" # chart version
+  version    = "1.30.3" # chart version
 
   create_namespace = true
 }
@@ -36,7 +36,7 @@ resource "helm_release" "istiod" {
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "istiod"
   namespace  = "istio-system"
-  version    = "1.28.2" # chart version
+  version    = "1.30.3" # chart version
   depends_on = [helm_release.istio_base[0]]
 }
 
@@ -54,8 +54,8 @@ resource "helm_release" "istio-gateway" {
 
   repository = "https://istio-release.storage.googleapis.com/charts"
   chart      = "gateway"
-  namespace  = "istio-system"
-  version    = "1.28.2" # chart version
+  namespace  = "istio-gateway"
+  version    = "1.30.3" # chart version
 
   set = [
     {
