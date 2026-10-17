@@ -2,15 +2,15 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.58"
+      version = "~> 6.69"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 3.2"
+      version = "~> 3.3"
     }
   }
 
-  required_version = "~> 1.15"
+  required_version = "~> 1.16"
 
   # backend "s3" {
   #   bucket  = "xxx"
@@ -34,8 +34,8 @@ provider "helm" {
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
     exec = {
       api_version = "client.authentication.k8s.io/v1beta1"
-      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
       command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.region]
     }
   }
 }
