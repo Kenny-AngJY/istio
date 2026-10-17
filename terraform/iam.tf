@@ -3,7 +3,7 @@ VPC CNI
 ----------------------------------------------------------------------------------- */
 resource "aws_iam_role" "eks_vpc_cni_role" {
   count       = var.enable_auto_mode ? 0 : 1
-  name        = "vpc-cni-irsa"
+  name        = "${local.name}-vpc-cni"
   description = "IAM role for VPC-CNI add-on"
 
   assume_role_policy = var.use_eks_pod_identity_agent ? jsonencode({
@@ -21,7 +21,7 @@ resource "aws_iam_role" "eks_vpc_cni_role" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:SourceAccount" : data.aws_caller_identity.current.id
+            "aws:SourceAccount" : data.aws_caller_identity.current.account_id
           },
           "ArnEquals" : {
             "aws:SourceArn" : module.eks.cluster_arn
@@ -47,8 +47,6 @@ resource "aws_iam_role" "eks_vpc_cni_role" {
       }
     ]
   })
-
-  tags = local.default_tags
 }
 
 resource "aws_iam_role_policy_attachment" "eks_vpc_cni_policy_attachment" {
@@ -57,8 +55,8 @@ resource "aws_iam_role_policy_attachment" "eks_vpc_cni_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
 }
 
-resource "aws_eks_pod_identity_association" "example" {
-  count           = var.use_eks_pod_identity_agent ? 1 : 0
+resource "aws_eks_pod_identity_association" "vpc_cni" {
+  count           = var.use_eks_pod_identity_agent && !var.enable_auto_mode ? 1 : 0
   cluster_name    = module.eks.cluster_name
   namespace       = "kube-system"
   service_account = "aws-node"
@@ -70,7 +68,7 @@ EKS Amazon EBS CSI add-on
 ----------------------------------------------------------------------------------- */
 resource "aws_iam_role" "amazon_EBS_CSI_iam_role" {
   count       = var.create_aws_ebs_csi_driver_add_on && !var.enable_auto_mode ? 1 : 0
-  name        = "amazon-ebs-csi-irsa"
+  name        = "${local.name}-ebs-csi"
   description = "IAM role for Amazon EBS CSI driver add-on"
 
   assume_role_policy = jsonencode({
@@ -91,7 +89,6 @@ resource "aws_iam_role" "amazon_EBS_CSI_iam_role" {
       }
     ]
   })
-
 }
 
 resource "aws_iam_role_policy_attachment" "amazon_EBS_CSI_iam_role" {
@@ -116,8 +113,8 @@ annotate an IAM role to the fluent bit's serviceaccount.
 */
 resource "aws_iam_role" "CloudWatchAgent" {
   count       = var.create_amazon_cloudwatch_observability_add_on ? 1 : 0
-  name        = "CloudWatchAgent_EKS"
-  description = "One for each AWS account"
+  name        = "${local.name}-cloudwatch-agent"
+  description = "IAM role for the Amazon CloudWatch Observability add-on"
 
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17"
@@ -137,8 +134,6 @@ resource "aws_iam_role" "CloudWatchAgent" {
       }
     ]
   })
-
-  tags = local.default_tags
 }
 
 resource "aws_iam_role_policy_attachment" "aws_cloudwatch-observability-add-on-IRSA" {
