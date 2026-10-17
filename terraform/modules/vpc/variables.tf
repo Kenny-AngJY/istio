@@ -1,7 +1,3 @@
-variable "default_tags" {
-  type = map(any)
-}
-
 ### list (or tuple): a sequence of values
 variable "list_of_public_cidr_range" {
   type = list(string)
@@ -15,8 +11,7 @@ variable "list_of_private_cidr_range" {
 }
 
 variable "list_of_azs" {
-  type    = list(string)
-  default = ["ap-southeast-1a", "ap-southeast-1b", "ap-southeast-1c"]
+  type = list(string)
 }
 
 variable "vpc_cidr_block" {
@@ -24,6 +19,10 @@ variable "vpc_cidr_block" {
 }
 
 variable "stack_name" {
+  type = string
+}
+
+variable "cluster_name" {
   type = string
 }
 

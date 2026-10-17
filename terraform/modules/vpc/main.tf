@@ -4,22 +4,16 @@ resource "aws_vpc" "main" {
   ### Must be enabled for EFS
   # enable_dns_support   = true
   enable_dns_hostnames = true
-  tags = merge(
-    var.default_tags,
-    {
-      Name = "terraform-vpc-${var.stack_name}"
-    },
-  )
+  tags = {
+    Name = "terraform-vpc-${var.stack_name}"
+  }
 }
 
 resource "aws_internet_gateway" "internet-gw" {
   vpc_id = aws_vpc.main.id
-  tags = merge(
-    var.default_tags,
-    {
-      Name = "terraform-vpc-igw-${var.stack_name}"
-    },
-  )
+  tags = {
+    Name = "terraform-vpc-igw-${var.stack_name}"
+  }
 }
 
 resource "aws_route_table" "public" {
@@ -28,12 +22,9 @@ resource "aws_route_table" "public" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.internet-gw.id
   }
-  tags = merge(
-    var.default_tags,
-    {
-      Name = "custom-public-routetable-${var.stack_name}"
-    },
-  )
+  tags = {
+    Name = "custom-public-routetable-${var.stack_name}"
+  }
 }
 
 resource "aws_subnet" "public" {
@@ -44,14 +35,12 @@ resource "aws_subnet" "public" {
   cidr_block              = var.list_of_public_cidr_range[count.index]
   availability_zone       = var.list_of_azs[count.index]
   map_public_ip_on_launch = true
-  tags = merge(
-    var.default_tags,
-    {
-      Name = format("terraform_public_%s", (count.index + 1))
-      # https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/subnet_discovery/
-      "kubernetes.io/role/elb" = 1
-    }
-  )
+  tags = {
+    Name = format("terraform_public_%s", (count.index + 1))
+    # https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/subnet_discovery/
+    "kubernetes.io/role/elb"                    = 1
+    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+  }
 }
 
 resource "aws_route_table_association" "public" {
@@ -68,28 +57,24 @@ resource "aws_subnet" "private" {
   cidr_block              = var.list_of_private_cidr_range[count.index]
   availability_zone       = var.list_of_azs[count.index]
   map_public_ip_on_launch = false
-  tags = merge(
-    var.default_tags,
-    {
-      Name = format("terraform_private_%s", (count.index + 1))
-      # https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/subnet_discovery/
-      "kubernetes.io/role/internal-elb" = 1
-    }
-  )
+  tags = {
+    Name = format("terraform_private_%s", (count.index + 1))
+    # https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/subnet_discovery/
+    "kubernetes.io/role/internal-elb"           = 1
+    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+  }
 }
 
 resource "aws_route_table" "private" {
+  count  = var.create_nat_gateway ? 1 : 0
   vpc_id = aws_vpc.main.id
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.public[0].id
   }
-  tags = merge(
-    var.default_tags,
-    {
-      Name = "custom-private-routetable-${var.stack_name}"
-    },
-  )
+  tags = {
+    Name = "custom-private-routetable-${var.stack_name}"
+  }
 }
 
 resource "aws_eip" "nat_gw" {
@@ -104,7 +89,7 @@ resource "aws_nat_gateway" "public" {
   subnet_id     = aws_subnet.public[0].id
 
   tags = {
-    Name = "NAT-GW-EKS-Fargate"
+    Name = "NAT-GW"
   }
 
   # To ensure proper ordering, it is recommended to add an explicit dependency
@@ -113,7 +98,7 @@ resource "aws_nat_gateway" "public" {
 }
 
 resource "aws_route_table_association" "private" {
-  count          = length(var.list_of_azs)
+  count          = length(var.list_of_azs) * (var.create_nat_gateway ? 1 : 0)
   subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private.id
+  route_table_id = aws_route_table.private[0].id
 }
