@@ -21,7 +21,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
       - name: curl
-        image: docker.io/curlimages/curl:8.17.0
+        image: docker.io/curlimages/curl:8.23.0
         command: ["/bin/sleep", "infinity"]
         imagePullPolicy: IfNotPresent
         resources:
