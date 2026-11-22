@@ -21,10 +21,10 @@ resource "helm_release" "istio_base" {
   count = var.install_istio_charts ? 1 : 0
   name  = "istio-base"
 
-  repository = "https://istio-release.storage.googleapis.com/charts"
+  repository = "https://blob.istio.io/istio-release/charts"
   chart      = "base"
   namespace  = "istio-system"
-  version    = "1.31.2" # chart version
+  version    = "1.32.0" # chart version
 
   create_namespace = true
 
@@ -36,10 +36,10 @@ resource "helm_release" "istiod" {
   count = var.install_istio_charts ? 1 : 0
   name  = "istiod"
 
-  repository = "https://istio-release.storage.googleapis.com/charts"
+  repository = "https://blob.istio.io/istio-release/charts"
   chart      = "istiod"
   namespace  = "istio-system"
-  version    = "1.31.2" # chart version
+  version    = "1.32.0" # chart version
   depends_on = [helm_release.istio_base[0]]
 }
 
@@ -55,10 +55,10 @@ resource "helm_release" "istio-gateway" {
   count = var.install_istio_charts && var.install_istio_gateway ? 1 : 0
   name  = "istio-gateway"
 
-  repository = "https://istio-release.storage.googleapis.com/charts"
+  repository = "https://blob.istio.io/istio-release/charts"
   chart      = "gateway"
   namespace  = "istio-gateway"
-  version    = "1.31.2" # chart version
+  version    = "1.32.0" # chart version
 
   set = [
     {
